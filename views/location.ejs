@@ -11,7 +11,7 @@
       </thead>
       <tbody>
         <% locations.forEach(l => { %>
-          <tr><td><%= l.location_id %></td><td><%= l.location_name %></td><td><%= l.address %></td></tr>
+          <tr><td><%= l.location_id %></td><td><%= l.location_name %></td><td><%= l.location_address %></td></tr>
         <% }) %>
         <% if (!locations.length) { %><tr><td colspan="3" style="text-align:center;color:#888">No locations found.</td></tr><% } %>
       </tbody>

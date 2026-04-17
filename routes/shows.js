@@ -14,7 +14,7 @@ const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 router.get('/myshows', requireLogin, async (req, res) => {
   try {
     const [shows] = await db.query(
-      'SELECT * FROM show_event WHERE coordinator_id = ? ORDER BY start_time DESC',
+      'SELECT * FROM show_event WHERE user_id = ? ORDER BY show_date DESC',
       [req.session.user.id]
     );
     res.render('myshows', { shows });
@@ -27,12 +27,12 @@ router.get('/myshows', requireLogin, async (req, res) => {
 router.get('/myshowsregistration', requireLogin, (req, res) => res.render('myshowsregistration'));
 
 router.post('/myshowsregistration', requireLogin, upload.single('logo'), async (req, res) => {
-  const { show_name, show_date, venue, address, start_time, end_time } = req.body;
+  const { show_name, show_date, venue, show_address, start_time, end_time, collection_id } = req.body;
   const logo_path = req.file ? `/uploads/${req.file.filename}` : null;
   try {
     await db.query(
-      'INSERT INTO show_event (show_name, show_date, venue, address, start_time, end_time, coordinator_id, logo_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [show_name, show_date, venue, address, start_time, end_time, req.session.user.id, logo_path]
+      'INSERT INTO show_event (collection_id, user_id, show_name, show_date, venue, start_time, end_time, show_address, logo_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [collection_id || null, req.session.user.id, show_name, show_date, venue, start_time || null, end_time || null, show_address, logo_path]
     );
     req.flash('success', 'Show added successfully.');
     res.redirect('/myshows');
@@ -49,7 +49,7 @@ router.post('/myshowsdelete', requireLogin, async (req, res) => {
   const { show_name, show_date, venue } = req.body;
   try {
     await db.query(
-      'DELETE FROM show_event WHERE show_name = ? AND show_date = ? AND venue = ? AND coordinator_id = ?',
+      'DELETE FROM show_event WHERE show_name = ? AND show_date = ? AND venue = ? AND user_id = ?',
       [show_name, show_date, venue, req.session.user.id]
     );
     req.flash('success', 'Show deleted.');

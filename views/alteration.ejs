@@ -13,7 +13,9 @@
         <% alterations.forEach(a => { %>
           <tr>
             <td><%= a.alteration_id %></td><td><%= a.item_id %></td><td><%= a.fitting_id %></td>
-            <td><%= a.alteration_type %></td><td><%= a.date_needed_by ? new Date(a.date_needed_by).toLocaleDateString() : '' %></td><td><%= a.status %></td>
+            <td><%= a.alteration_type %></td>
+            <td><%= a.date_needed_by ? new Date(a.date_needed_by).toLocaleDateString() : '' %></td>
+            <td><%= a.alteration_status %></td>
           </tr>
         <% }) %>
         <% if (!alterations.length) { %><tr><td colspan="6" style="text-align:center;color:#888">No alterations found.</td></tr><% } %>

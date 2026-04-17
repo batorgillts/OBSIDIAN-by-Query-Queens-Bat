@@ -7,13 +7,13 @@
   <div class="table-wrapper">
     <table>
       <thead>
-        <tr><th>Fitting ID</th><th>Look ID</th><th>Model ID</th><th>Fitting Date</th><th>Status</th></tr>
+        <tr><th>Fitting ID</th><th>Look ID</th><th>Fitting Date</th><th>Status</th></tr>
       </thead>
       <tbody>
         <% fittings.forEach(f => { %>
-          <tr><td><%= f.fitting_id %></td><td><%= f.look_id %></td><td><%= f.model_id %></td><td><%= f.fitting_date ? new Date(f.fitting_date).toLocaleDateString() : '' %></td><td><%= f.status %></td></tr>
+          <tr><td><%= f.fitting_id %></td><td><%= f.look_id %></td><td><%= f.fitting_date ? new Date(f.fitting_date).toLocaleDateString() : '' %></td><td><%= f.fitting_status %></td></tr>
         <% }) %>
-        <% if (!fittings.length) { %><tr><td colspan="5" style="text-align:center;color:#888">No fittings found.</td></tr><% } %>
+        <% if (!fittings.length) { %><tr><td colspan="4" style="text-align:center;color:#888">No fittings found.</td></tr><% } %>
       </tbody>
     </table>
   </div>

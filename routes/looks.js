@@ -19,11 +19,11 @@ router.get('/lookadd', requireLogin, (req, res) =>
 );
 
 router.post('/lookadd', requireLogin, async (req, res) => {
-  const { collection_id, model_id, item_name, category, description, show_id } = req.body;
+  const { collection_id, model_id, look_category, look_description, show_id } = req.body;
   try {
     await db.query(
-      'INSERT INTO fashion_look (collection_id, model_id, item_name, category, description) VALUES (?, ?, ?, ?, ?)',
-      [collection_id, model_id, item_name, category, description]
+      'INSERT INTO fashion_look (collection_id, model_id, look_category, look_description) VALUES (?, ?, ?, ?)',
+      [collection_id, model_id, look_category, look_description]
     );
     req.flash('success', 'Look added.');
     res.redirect(`/look${show_id ? `?show_id=${show_id}` : ''}`);
@@ -39,12 +39,9 @@ router.get('/lookdelete', requireLogin, (req, res) =>
 );
 
 router.post('/lookdelete', requireLogin, async (req, res) => {
-  const { look_id, collection_id, model_id, show_id } = req.body;
+  const { look_id, show_id } = req.body;
   try {
-    await db.query(
-      'DELETE FROM fashion_look WHERE look_id = ? AND collection_id = ? AND model_id = ?',
-      [look_id, collection_id, model_id]
-    );
+    await db.query('DELETE FROM fashion_look WHERE look_id = ?', [look_id]);
     req.flash('success', 'Look deleted.');
     res.redirect(`/look${show_id ? `?show_id=${show_id}` : ''}`);
   } catch (err) {

@@ -19,11 +19,11 @@ router.get('/locationadd', requireLogin, (req, res) =>
 );
 
 router.post('/locationadd', requireLogin, async (req, res) => {
-  const { location_name, address, show_id } = req.body;
+  const { location_name, location_address, show_id } = req.body;
   try {
     await db.query(
-      'INSERT INTO fit_location (location_name, address) VALUES (?, ?)',
-      [location_name, address]
+      'INSERT INTO fit_location (location_name, location_address) VALUES (?, ?)',
+      [location_name, location_address]
     );
     req.flash('success', 'Location added.');
     res.redirect(`/location${show_id ? `?show_id=${show_id}` : ''}`);

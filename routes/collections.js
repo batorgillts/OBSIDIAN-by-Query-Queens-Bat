@@ -19,11 +19,11 @@ router.get('/collectionadd', requireLogin, (req, res) =>
 );
 
 router.post('/collectionadd', requireLogin, async (req, res) => {
-  const { collection_name, brand, season, year, status, show_id } = req.body;
+  const { collection_name, brand, season, collection_year, collection_status, show_id } = req.body;
   try {
     await db.query(
-      'INSERT INTO fit_collection (collection_name, brand, season, year, status) VALUES (?, ?, ?, ?, ?)',
-      [collection_name, brand, season, year, status]
+      'INSERT INTO fit_collection (collection_name, brand, season, collection_year, collection_status) VALUES (?, ?, ?, ?, ?)',
+      [collection_name, brand, season, collection_year, collection_status]
     );
     req.flash('success', 'Collection added.');
     res.redirect(`/collection${show_id ? `?show_id=${show_id}` : ''}`);
@@ -46,7 +46,7 @@ router.post('/collectiondelete', requireLogin, async (req, res) => {
     res.redirect(`/collection${show_id ? `?show_id=${show_id}` : ''}`);
   } catch (err) {
     console.error(err);
-    req.flash('error', 'Failed to delete collection. It may have dependent records.');
+    req.flash('error', 'Failed to delete. Collection may have dependent records.');
     res.redirect('/collectiondelete');
   }
 });
@@ -58,7 +58,10 @@ router.get('/collectionstatus', requireLogin, (req, res) =>
 router.post('/collectionstatus', requireLogin, async (req, res) => {
   const { collection_id, new_status, show_id } = req.body;
   try {
-    await db.query('UPDATE fit_collection SET status = ? WHERE collection_id = ?', [new_status, collection_id]);
+    await db.query(
+      'UPDATE fit_collection SET collection_status = ? WHERE collection_id = ?',
+      [new_status, collection_id]
+    );
     req.flash('success', 'Status updated.');
     res.redirect(`/collection${show_id ? `?show_id=${show_id}` : ''}`);
   } catch (err) {

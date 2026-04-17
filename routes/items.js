@@ -19,11 +19,11 @@ router.get('/itemadd', requireLogin, (req, res) =>
 );
 
 router.post('/itemadd', requireLogin, async (req, res) => {
-  const { location_id, collection_id, category, description, item_version, size, condition, show_id } = req.body;
+  const { location_id, collection_id, item_category, item_size, item_description, item_version, item_condition, show_id } = req.body;
   try {
     await db.query(
-      'INSERT INTO item (location_id, collection_id, category, description, item_version, size, item_condition) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [location_id, collection_id, category, description, item_version, size, condition]
+      'INSERT INTO item (collection_id, location_id, item_category, item_size, item_description, item_version, item_condition) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [collection_id, location_id, item_category, item_size, item_description, item_version, item_condition]
     );
     req.flash('success', 'Item added.');
     res.redirect(`/item${show_id ? `?show_id=${show_id}` : ''}`);
@@ -39,12 +39,9 @@ router.get('/itemdelete', requireLogin, (req, res) =>
 );
 
 router.post('/itemdelete', requireLogin, async (req, res) => {
-  const { item_id, location_id, collection_id, show_id } = req.body;
+  const { item_id, show_id } = req.body;
   try {
-    await db.query(
-      'DELETE FROM item WHERE item_id = ? AND location_id = ? AND collection_id = ?',
-      [item_id, location_id, collection_id]
-    );
+    await db.query('DELETE FROM item WHERE item_id = ?', [item_id]);
     req.flash('success', 'Item deleted.');
     res.redirect(`/item${show_id ? `?show_id=${show_id}` : ''}`);
   } catch (err) {

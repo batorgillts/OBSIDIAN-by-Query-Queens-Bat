@@ -19,11 +19,11 @@ router.get('/alterationadd', requireLogin, (req, res) =>
 );
 
 router.post('/alterationadd', requireLogin, async (req, res) => {
-  const { item_id, fitting_id, alteration_type, date_needed_by, status, show_id } = req.body;
+  const { item_id, fitting_id, alteration_type, date_needed_by, alteration_status, show_id } = req.body;
   try {
     await db.query(
-      'INSERT INTO alteration (item_id, fitting_id, alteration_type, date_needed_by, status) VALUES (?, ?, ?, ?, ?)',
-      [item_id, fitting_id, alteration_type, date_needed_by, status]
+      'INSERT INTO alteration (item_id, fitting_id, alteration_type, date_needed_by, alteration_status) VALUES (?, ?, ?, ?, ?)',
+      [item_id, fitting_id, alteration_type, date_needed_by, alteration_status]
     );
     req.flash('success', 'Alteration added.');
     res.redirect(`/alteration${show_id ? `?show_id=${show_id}` : ''}`);
@@ -39,12 +39,9 @@ router.get('/alterationdelete', requireLogin, (req, res) =>
 );
 
 router.post('/alterationdelete', requireLogin, async (req, res) => {
-  const { alteration_id, item_id, fitting_id, show_id } = req.body;
+  const { alteration_id, show_id } = req.body;
   try {
-    await db.query(
-      'DELETE FROM alteration WHERE alteration_id = ? AND item_id = ? AND fitting_id = ?',
-      [alteration_id, item_id, fitting_id]
-    );
+    await db.query('DELETE FROM alteration WHERE alteration_id = ?', [alteration_id]);
     req.flash('success', 'Alteration deleted.');
     res.redirect(`/alteration${show_id ? `?show_id=${show_id}` : ''}`);
   } catch (err) {
@@ -59,11 +56,11 @@ router.get('/alterationstatus', requireLogin, (req, res) =>
 );
 
 router.post('/alterationstatus', requireLogin, async (req, res) => {
-  const { alteration_id, item_id, fitting_id, new_status, show_id } = req.body;
+  const { alteration_id, new_status, show_id } = req.body;
   try {
     await db.query(
-      'UPDATE alteration SET status = ? WHERE alteration_id = ? AND item_id = ? AND fitting_id = ?',
-      [new_status, alteration_id, item_id, fitting_id]
+      'UPDATE alteration SET alteration_status = ? WHERE alteration_id = ?',
+      [new_status, alteration_id]
     );
     req.flash('success', 'Status updated.');
     res.redirect(`/alteration${show_id ? `?show_id=${show_id}` : ''}`);

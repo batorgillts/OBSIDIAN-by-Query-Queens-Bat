@@ -7,11 +7,11 @@
   <div class="table-wrapper">
     <table>
       <thead>
-        <tr><th>Item ID</th><th>Location ID</th><th>Collection ID</th><th>Category</th><th>Description</th><th>Item Version</th><th>Size</th><th>Condition</th></tr>
+        <tr><th>Item ID</th><th>Location ID</th><th>Collection ID</th><th>Category</th><th>Description</th><th>Version</th><th>Size</th><th>Condition</th></tr>
       </thead>
       <tbody>
         <% items.forEach(i => { %>
-          <tr><td><%= i.item_id %></td><td><%= i.location_id %></td><td><%= i.collection_id %></td><td><%= i.category %></td><td><%= i.description %></td><td><%= i.item_version %></td><td><%= i.size %></td><td><%= i.item_condition %></td></tr>
+          <tr><td><%= i.item_id %></td><td><%= i.location_id %></td><td><%= i.collection_id %></td><td><%= i.item_category %></td><td><%= i.item_description %></td><td><%= i.item_version %></td><td><%= i.item_size %></td><td><%= i.item_condition %></td></tr>
         <% }) %>
         <% if (!items.length) { %><tr><td colspan="8" style="text-align:center;color:#888">No items found.</td></tr><% } %>
       </tbody>
