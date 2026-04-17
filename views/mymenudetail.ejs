@@ -1,0 +1,41 @@
+<%- include('partials/head') %>
+<%- include('partials/nav') %>
+<div class="shows-page">
+  <h1 class="page-title">OBSIDIAN</h1>
+  <h2 class="page-subtitle"><%= show.show_name %></h2>
+  <div class="menu-detail-grid">
+    <a href="/collection?show_id=<%= show.show_id %>" class="menu-card">
+      <img src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=300&q=80" alt="Collection" class="menu-card-img"/>
+      <span class="menu-card-label">Collection</span>
+    </a>
+    <a href="/alteration?show_id=<%= show.show_id %>" class="menu-card">
+      <img src="https://images.unsplash.com/photo-1594938298603-c8148c4b4f35?w=300&q=80" alt="Alteration" class="menu-card-img"/>
+      <span class="menu-card-label">Alteration</span>
+    </a>
+    <a href="/showorder?show_id=<%= show.show_id %>" class="menu-card">
+      <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&q=80" alt="Show Order" class="menu-card-img"/>
+      <span class="menu-card-label">Show Order</span>
+    </a>
+    <a href="/look?show_id=<%= show.show_id %>" class="menu-card">
+      <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=300&q=80" alt="Look" class="menu-card-img"/>
+      <span class="menu-card-label">Look</span>
+    </a>
+    <a href="/model?show_id=<%= show.show_id %>" class="menu-card">
+      <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300&q=80" alt="Model" class="menu-card-img"/>
+      <span class="menu-card-label">Model</span>
+    </a>
+    <a href="/item?show_id=<%= show.show_id %>" class="menu-card">
+      <img src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=300&q=80" alt="Item" class="menu-card-img"/>
+      <span class="menu-card-label">Item</span>
+    </a>
+    <a href="/fitting?show_id=<%= show.show_id %>" class="menu-card">
+      <img src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=300&q=80" alt="Fitting" class="menu-card-img"/>
+      <span class="menu-card-label">Fitting</span>
+    </a>
+    <a href="/location?show_id=<%= show.show_id %>" class="menu-card">
+      <img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=300&q=80" alt="Location" class="menu-card-img"/>
+      <span class="menu-card-label">Location</span>
+    </a>
+  </div>
+</div>
+</body></html>

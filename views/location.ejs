@@ -1,0 +1,26 @@
+<%- include('partials/head') %>
+<%- include('partials/nav') %>
+<div class="table-page">
+  <h1 class="page-title">OBSIDIAN</h1>
+  <h2 class="page-subtitle">Location</h2>
+  <%- include('partials/flash') %>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>Location ID</th><th>Location Name</th><th>Address</th></tr>
+      </thead>
+      <tbody>
+        <% locations.forEach(l => { %>
+          <tr><td><%= l.location_id %></td><td><%= l.location_name %></td><td><%= l.address %></td></tr>
+        <% }) %>
+        <% if (!locations.length) { %><tr><td colspan="3" style="text-align:center;color:#888">No locations found.</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+  <div class="btn-group">
+    <a href="/locationadd<%= show_id ? `?show_id=${show_id}` : '' %>" class="btn btn-dark">+ Add Location</a>
+    <a href="/locationdelete<%= show_id ? `?show_id=${show_id}` : '' %>" class="btn btn-dark">- Delete Location</a>
+    <% if (show_id) { %><a href="/mymenudetail/<%= show_id %>" class="btn btn-outline">&#8592; Back</a><% } %>
+  </div>
+</div>
+</body></html>

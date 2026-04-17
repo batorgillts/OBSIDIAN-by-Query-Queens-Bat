@@ -1,0 +1,26 @@
+<%- include('partials/head') %>
+<%- include('partials/nav') %>
+<div class="table-page">
+  <h1 class="page-title">OBSIDIAN</h1>
+  <h2 class="page-subtitle">Look</h2>
+  <%- include('partials/flash') %>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>Look ID</th><th>Collection ID</th><th>Model ID</th><th>Item Name</th><th>Category</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <% looks.forEach(l => { %>
+          <tr><td><%= l.look_id %></td><td><%= l.collection_id %></td><td><%= l.model_id %></td><td><%= l.item_name %></td><td><%= l.category %></td><td><%= l.description %></td></tr>
+        <% }) %>
+        <% if (!looks.length) { %><tr><td colspan="6" style="text-align:center;color:#888">No looks found.</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+  <div class="btn-group">
+    <a href="/lookadd<%= show_id ? `?show_id=${show_id}` : '' %>" class="btn btn-dark">+ Add Look</a>
+    <a href="/lookdelete<%= show_id ? `?show_id=${show_id}` : '' %>" class="btn btn-dark">- Delete Look</a>
+    <% if (show_id) { %><a href="/mymenudetail/<%= show_id %>" class="btn btn-outline">&#8592; Back</a><% } %>
+  </div>
+</div>
+</body></html>

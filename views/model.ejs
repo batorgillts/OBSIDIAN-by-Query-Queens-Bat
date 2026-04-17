@@ -1,0 +1,26 @@
+<%- include('partials/head') %>
+<%- include('partials/nav') %>
+<div class="table-page">
+  <h1 class="page-title">OBSIDIAN</h1>
+  <h2 class="page-subtitle">Model</h2>
+  <%- include('partials/flash') %>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>Model ID</th><th>First Name</th><th>Last Name</th><th>Agency</th><th>Email</th><th>Phone Number</th></tr>
+      </thead>
+      <tbody>
+        <% models.forEach(m => { %>
+          <tr><td><%= m.model_id %></td><td><%= m.first_name %></td><td><%= m.last_name %></td><td><%= m.agency %></td><td><%= m.email %></td><td><%= m.phone_number %></td></tr>
+        <% }) %>
+        <% if (!models.length) { %><tr><td colspan="6" style="text-align:center;color:#888">No models found.</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+  <div class="btn-group">
+    <a href="/modeladd<%= show_id ? `?show_id=${show_id}` : '' %>" class="btn btn-dark">+ Add Model</a>
+    <a href="/modeldelete<%= show_id ? `?show_id=${show_id}` : '' %>" class="btn btn-dark">- Delete Model</a>
+    <% if (show_id) { %><a href="/mymenudetail/<%= show_id %>" class="btn btn-outline">&#8592; Back</a><% } %>
+  </div>
+</div>
+</body></html>

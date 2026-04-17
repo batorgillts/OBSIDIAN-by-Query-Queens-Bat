@@ -1,0 +1,39 @@
+<%- include('partials/head') %>
+<%- include('partials/nav') %>
+<div class="table-page">
+  <h1 class="page-title">OBSIDIAN</h1>
+  <h2 class="page-subtitle">Collection</h2>
+  <%- include('partials/flash') %>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Collection ID</th><th>Collection Name</th><th>Brand</th>
+          <th>Season</th><th>Year</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% collections.forEach(c => { %>
+          <tr>
+            <td><%= c.collection_id %></td>
+            <td><%= c.collection_name %></td>
+            <td><%= c.brand %></td>
+            <td><%= c.season %></td>
+            <td><%= c.year %></td>
+            <td><%= c.status %></td>
+          </tr>
+        <% }) %>
+        <% if (!collections.length) { %>
+          <tr><td colspan="6" style="text-align:center;color:#888">No collections found.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+  <div class="btn-group">
+    <a href="/collectionadd<%= show_id ? `?show_id=${show_id}` : '' %>" class="btn btn-dark">+ Add Collection</a>
+    <a href="/collectiondelete<%= show_id ? `?show_id=${show_id}` : '' %>" class="btn btn-dark">- Delete Collection</a>
+    <a href="/collectionstatus<%= show_id ? `?show_id=${show_id}` : '' %>" class="btn btn-dark">Change Status</a>
+    <% if (show_id) { %><a href="/mymenudetail/<%= show_id %>" class="btn btn-outline">&#8592; Back</a><% } %>
+  </div>
+</div>
+</body></html>

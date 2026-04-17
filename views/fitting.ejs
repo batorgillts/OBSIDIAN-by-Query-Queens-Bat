@@ -1,0 +1,27 @@
+<%- include('partials/head') %>
+<%- include('partials/nav') %>
+<div class="table-page">
+  <h1 class="page-title">OBSIDIAN</h1>
+  <h2 class="page-subtitle">Fitting</h2>
+  <%- include('partials/flash') %>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>Fitting ID</th><th>Look ID</th><th>Model ID</th><th>Fitting Date</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <% fittings.forEach(f => { %>
+          <tr><td><%= f.fitting_id %></td><td><%= f.look_id %></td><td><%= f.model_id %></td><td><%= f.fitting_date ? new Date(f.fitting_date).toLocaleDateString() : '' %></td><td><%= f.status %></td></tr>
+        <% }) %>
+        <% if (!fittings.length) { %><tr><td colspan="5" style="text-align:center;color:#888">No fittings found.</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+  <div class="btn-group">
+    <a href="/fittingadd<%= show_id ? `?show_id=${show_id}` : '' %>" class="btn btn-dark">+ Add Fitting</a>
+    <a href="/fittingdelete<%= show_id ? `?show_id=${show_id}` : '' %>" class="btn btn-dark">- Delete Fitting</a>
+    <a href="/fittingstatus<%= show_id ? `?show_id=${show_id}` : '' %>" class="btn btn-dark">Change Status</a>
+    <% if (show_id) { %><a href="/mymenudetail/<%= show_id %>" class="btn btn-outline">&#8592; Back</a><% } %>
+  </div>
+</div>
+</body></html>
