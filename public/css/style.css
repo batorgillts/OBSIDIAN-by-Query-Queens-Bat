@@ -373,6 +373,22 @@ table tr:hover td { background: #f7f7f7; }
   margin-bottom: 18px;
 }
 
+/* ── Page Watermarks ── */
+.page-wm {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 30%;
+  max-width: 400px;
+  opacity: 0.1;
+  pointer-events: none;
+  z-index: 0;
+}
+.page-wm-left {
+  right: auto;
+  left: 0;
+}
+
 /* ── Responsive ── */
 @media (max-width: 480px) {
   .form-container { max-width: 100%; }
