@@ -22,6 +22,7 @@
     <a href="/fittingdelete<%= show_id ? `?show_id=${show_id}` : '' %>" class="btn btn-dark">- Delete Fitting</a>
     <a href="/fittingstatus<%= show_id ? `?show_id=${show_id}` : '' %>" class="btn btn-dark">Change Status</a>
     <% if (show_id) { %><a href="/mymenudetail/<%= show_id %>" class="btn btn-outline">&#8592; Back</a><% } %>
+    <% if (!show_id && user && user.role === 'developer') { %><a href="/admin" class="btn btn-outline">&#8592; Dashboard</a><% } %>
   </div>
 </div>
 <img class="page-wm page-wm-left" src="https://images.unsplash.com/photo-1558618047-3c8c76ca7d12?w=500&q=60" alt=""/>

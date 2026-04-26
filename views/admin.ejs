@@ -6,40 +6,40 @@
   <h2 class="page-subtitle">Developer Dashboard</h2>
   <%- include('partials/flash') %>
 
-  <!-- System-wide stats -->
+  <!-- System-wide stats — each card links to full data view -->
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;margin-bottom:36px;">
-    <div class="stat-card">
-      <span class="stat-number"><%= stats.total_coordinators %></span>
-      <span class="stat-label">Coordinators</span>
-    </div>
-    <div class="stat-card">
+    <a href="/myshows" class="stat-card">
       <span class="stat-number"><%= stats.total_shows %></span>
       <span class="stat-label">Shows</span>
-    </div>
-    <div class="stat-card">
+    </a>
+    <a href="/collection" class="stat-card">
       <span class="stat-number"><%= stats.total_collections %></span>
       <span class="stat-label">Collections</span>
-    </div>
-    <div class="stat-card">
+    </a>
+    <a href="/look" class="stat-card">
       <span class="stat-number"><%= stats.total_looks %></span>
       <span class="stat-label">Looks</span>
-    </div>
-    <div class="stat-card">
+    </a>
+    <a href="/item" class="stat-card">
       <span class="stat-number"><%= stats.total_items %></span>
       <span class="stat-label">Items</span>
-    </div>
-    <div class="stat-card">
+    </a>
+    <a href="/model" class="stat-card">
       <span class="stat-number"><%= stats.total_models %></span>
       <span class="stat-label">Models</span>
-    </div>
-    <div class="stat-card">
+    </a>
+    <a href="/fitting" class="stat-card">
       <span class="stat-number"><%= stats.total_fittings %></span>
       <span class="stat-label">Fittings</span>
-    </div>
-    <div class="stat-card">
+    </a>
+    <a href="/alteration" class="stat-card">
       <span class="stat-number"><%= stats.total_alterations %></span>
       <span class="stat-label">Alterations</span>
-    </div>
+    </a>
+    <a href="/location" class="stat-card">
+      <span class="stat-number"><%= stats.total_coordinators %></span>
+      <span class="stat-label">Locations</span>
+    </a>
   </div>
 
   <!-- All coordinators table -->
@@ -92,6 +92,14 @@
   align-items: center;
   gap: 6px;
   box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  text-decoration: none;
+  color: inherit;
+  transition: transform .15s, box-shadow .15s;
+  cursor: pointer;
+}
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0,0,0,.13);
 }
 .stat-number {
   font-size: 32px;

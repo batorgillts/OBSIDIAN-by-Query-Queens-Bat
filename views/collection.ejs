@@ -25,6 +25,7 @@
     <a href="/collectiondelete<%= show_id ? `?show_id=${show_id}` : '' %>" class="btn btn-dark">- Delete Collection</a>
     <a href="/collectionstatus<%= show_id ? `?show_id=${show_id}` : '' %>" class="btn btn-dark">Change Status</a>
     <% if (show_id) { %><a href="/mymenudetail/<%= show_id %>" class="btn btn-outline">&#8592; Back</a><% } %>
+    <% if (!show_id && user && user.role === 'developer') { %><a href="/admin" class="btn btn-outline">&#8592; Dashboard</a><% } %>
   </div>
 </div>
 <img class="page-wm" src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=500&q=60" alt=""/>

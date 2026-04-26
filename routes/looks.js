@@ -11,7 +11,9 @@ router.get('/look', requireLogin, async (req, res) => {
           `SELECT l.* FROM fashion_look l
            JOIN show_event se ON se.collection_id = l.collection_id
            WHERE se.show_id = ? ORDER BY l.look_id`, [show_id])
-      : [[]];
+      : req.session.user.role === 'developer'
+        ? await db.query(`SELECT * FROM fashion_look ORDER BY look_id`)
+        : [[]];
     res.render('look', { looks, show_id });
   } catch (err) {
     console.error(err);

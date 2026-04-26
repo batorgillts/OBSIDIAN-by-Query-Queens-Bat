@@ -12,7 +12,9 @@ router.get('/model', requireLogin, async (req, res) => {
            JOIN fashion_look l ON l.model_id = m.model_id
            JOIN show_event se ON se.collection_id = l.collection_id
            WHERE se.show_id = ? ORDER BY m.model_id`, [show_id])
-      : [[]];
+      : req.session.user.role === 'developer'
+        ? await db.query(`SELECT * FROM model ORDER BY model_id`)
+        : [[]];
     res.render('model', { models, show_id });
   } catch (err) {
     console.error(err);

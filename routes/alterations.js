@@ -12,7 +12,9 @@ router.get('/alteration', requireLogin, async (req, res) => {
            JOIN item i ON i.item_id = a.item_id
            JOIN show_event se ON se.collection_id = i.collection_id
            WHERE se.show_id = ? ORDER BY a.alteration_id`, [show_id])
-      : [[]];
+      : req.session.user.role === 'developer'
+        ? await db.query(`SELECT * FROM alteration ORDER BY alteration_id`)
+        : [[]];
     res.render('alteration', { alterations, show_id });
   } catch (err) {
     console.error(err);

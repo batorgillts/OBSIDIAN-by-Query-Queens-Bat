@@ -12,7 +12,9 @@ router.get('/location', requireLogin, async (req, res) => {
            JOIN item i ON i.location_id = l.location_id
            JOIN show_event se ON se.collection_id = i.collection_id
            WHERE se.show_id = ? ORDER BY l.location_id`, [show_id])
-      : [[]];
+      : req.session.user.role === 'developer'
+        ? await db.query(`SELECT * FROM fit_location ORDER BY location_id`)
+        : [[]];
     res.render('location', { locations, show_id });
   } catch (err) {
     console.error(err);

@@ -11,7 +11,9 @@ router.get('/collection', requireLogin, async (req, res) => {
           `SELECT c.* FROM fit_collection c
            JOIN show_event se ON se.collection_id = c.collection_id
            WHERE se.show_id = ? ORDER BY c.collection_id`, [show_id])
-      : [[]];
+      : req.session.user.role === 'developer'
+        ? await db.query(`SELECT * FROM fit_collection ORDER BY collection_id`)
+        : [[]];
     res.render('collection', { collections, show_id });
   } catch (err) {
     console.error(err);

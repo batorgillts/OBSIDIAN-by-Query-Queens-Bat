@@ -27,6 +27,7 @@
     <a href="/alterationdelete<%= show_id ? `?show_id=${show_id}` : '' %>" class="btn btn-dark">- Delete an Alteration</a>
     <a href="/alterationstatus<%= show_id ? `?show_id=${show_id}` : '' %>" class="btn btn-dark">Change Status</a>
     <% if (show_id) { %><a href="/mymenudetail/<%= show_id %>" class="btn btn-outline">&#8592; Back</a><% } %>
+    <% if (!show_id && user && user.role === 'developer') { %><a href="/admin" class="btn btn-outline">&#8592; Dashboard</a><% } %>
   </div>
 </div>
 <img class="page-wm" src="https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?w=500&q=60" alt=""/>
