@@ -6,20 +6,43 @@ const { requireLogin } = require('../middleware/auth');
 router.get('/alteration', requireLogin, async (req, res) => {
   const show_id = req.query.show_id;
   try {
-    const [alterations] = show_id
-      ? await db.query(
-          `SELECT a.* FROM alteration a
-           JOIN item i ON i.item_id = a.item_id
-           JOIN show_event se ON se.collection_id = i.collection_id
-           WHERE se.show_id = ? ORDER BY a.alteration_id`, [show_id])
-      : req.session.user.role === 'developer'
-        ? await db.query(`SELECT * FROM alteration ORDER BY alteration_id`)
-        : [[]];
-    res.render('alteration', { alterations, show_id });
+    let alterations = [];
+    const search = req.query.search || '';
+    const sort = req.query.sort || 'alteration_id';
+    const allowed = ['alteration_id','alteration_type','date_needed_by','alteration_status'];
+    const sort_col = allowed.includes(sort) ? sort : 'alteration_id';
+    if (show_id) {
+      let sql = `SELECT a.* FROM alteration a JOIN item i ON i.item_id = a.item_id JOIN show_event se ON se.collection_id = i.collection_id WHERE se.show_id = ?`;
+      let p = [show_id];
+      if (search) { sql += ` AND (a.alteration_type LIKE ? OR a.alteration_status LIKE ?)`; p.push(`%${search}%`,`%${search}%`); }
+      sql += ` ORDER BY a.${sort_col}`;
+      [alterations] = await db.query(sql, p);
+    } else if (req.session.user.role === 'developer') {
+      let sql = `SELECT * FROM alteration WHERE 1=1`;
+      let p = [];
+      if (search) { sql += ` AND (alteration_type LIKE ? OR alteration_status LIKE ?)`; p.push(`%${search}%`,`%${search}%`); }
+      sql += ` ORDER BY ${sort_col}`;
+      [alterations] = await db.query(sql, p);
+    }
+    res.render('alteration', { alterations, show_id, search, sort: sort_col });
   } catch (err) {
     console.error(err);
-    res.render('alteration', { alterations: [], show_id });
+    res.render('alteration', { alterations: [], show_id, search: '', sort: 'alteration_id' });
   }
+});
+
+router.get('/alteration/export', requireLogin, async (req, res) => {
+  const show_id = req.query.show_id;
+  try {
+    const [rows] = show_id
+      ? await db.query(`SELECT a.* FROM alteration a JOIN item i ON i.item_id = a.item_id JOIN show_event se ON se.collection_id = i.collection_id WHERE se.show_id = ? ORDER BY a.alteration_id`, [show_id])
+      : await db.query(`SELECT * FROM alteration ORDER BY alteration_id`);
+    const headers = ['alteration_id','item_id','fitting_id','alteration_type','date_needed_by','alteration_status'];
+    const csv = [headers.join(','), ...rows.map(r => headers.map(h => `"${(r[h]??'').toString().replace(/"/g,'""')}"`).join(','))].join('\n');
+    res.setHeader('Content-Type','text/csv');
+    res.setHeader('Content-Disposition','attachment; filename="alterations_export.csv"');
+    res.send(csv);
+  } catch(err) { console.error(err); res.redirect(`/alteration${show_id?`?show_id=${show_id}`:''}`); }
 });
 
 router.get('/alterationadd', requireLogin, (req, res) =>

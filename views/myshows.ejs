@@ -13,6 +13,9 @@
           <div class="show-logo-placeholder">No Logo</div>
         <% } %>
         <span class="show-label"><%= show.show_name %></span>
+        <% if (isAdmin && show.coordinator_name) { %>
+          <span style="font-size:11px;color:#888;margin-top:2px;"><%= show.coordinator_name %></span>
+        <% } %>
       </a>
     <% }) %>
     <% if (!shows.length) { %>
@@ -22,6 +25,7 @@
   <div class="btn-group">
     <a href="/myshowsregistration" class="btn btn-dark">+ Add Show</a>
     <a href="/myshowsdelete" class="btn btn-dark">- Delete Show</a>
+    <% if (isAdmin) { %><a href="/admin" class="btn btn-outline">&#8592; Dashboard</a><% } %>
   </div>
 </div>
 </body></html>

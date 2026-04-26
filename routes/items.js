@@ -16,11 +16,14 @@ router.get('/item', requireLogin, async (req, res) => {
                  JOIN show_event se ON se.collection_id = i.collection_id
                  WHERE se.show_id = ?`;
       let params = [show_id];
-      if (category) {
-        sql += ` AND i.item_category LIKE ?`;
-        params.push(`%${category}%`);
-      }
+      if (category) { sql += ` AND i.item_category LIKE ?`; params.push(`%${category}%`); }
       sql += ` ORDER BY i.${sort_col}`;
+      [items] = await db.query(sql, params);
+    } else if (req.session.user.role === 'developer') {
+      let sql = `SELECT * FROM item WHERE 1=1`;
+      let params = [];
+      if (category) { sql += ` AND item_category LIKE ?`; params.push(`%${category}%`); }
+      sql += ` ORDER BY ${sort_col}`;
       [items] = await db.query(sql, params);
     }
     res.render('item', { items, show_id, category, sort: sort_col });

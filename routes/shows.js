@@ -52,10 +52,15 @@ router.get('/admin', requireLogin, async (req, res) => {
 router.get('/myshows', requireLogin, async (req, res) => {
   try {
     const [shows] = await db.query(
-      'SELECT * FROM show_event WHERE user_id = ? ORDER BY show_date DESC',
-      [req.session.user.id]
+      req.session.user.role === 'developer'
+        ? `SELECT se.*, CONCAT(sc.first_name,' ',sc.last_name) AS coordinator_name
+           FROM show_event se
+           LEFT JOIN show_coordinator sc ON sc.user_id = se.user_id
+           ORDER BY se.show_date DESC`
+        : 'SELECT * FROM show_event WHERE user_id = ? ORDER BY show_date DESC',
+      req.session.user.role === 'developer' ? [] : [req.session.user.id]
     );
-    res.render('myshows', { shows });
+    res.render('myshows', { shows, isAdmin: req.session.user.role === 'developer' });
   } catch (err) {
     console.error(err);
     res.render('myshows', { shows: [] });

@@ -5,20 +5,44 @@ const { requireLogin } = require('../middleware/auth');
 
 router.get('/collection', requireLogin, async (req, res) => {
   const show_id = req.query.show_id;
+  const search = req.query.search || '';
+  const sort = req.query.sort || 'collection_id';
+  const allowed = ['collection_id','collection_name','brand','season','collection_year','collection_status'];
+  const sort_col = allowed.includes(sort) ? sort : 'collection_id';
   try {
-    const [collections] = show_id
-      ? await db.query(
-          `SELECT c.* FROM fit_collection c
-           JOIN show_event se ON se.collection_id = c.collection_id
-           WHERE se.show_id = ? ORDER BY c.collection_id`, [show_id])
-      : req.session.user.role === 'developer'
-        ? await db.query(`SELECT * FROM fit_collection ORDER BY collection_id`)
-        : [[]];
-    res.render('collection', { collections, show_id });
+    let collections = [];
+    if (show_id) {
+      let sql = `SELECT c.* FROM fit_collection c JOIN show_event se ON se.collection_id = c.collection_id WHERE se.show_id = ?`;
+      let p = [show_id];
+      if (search) { sql += ` AND (c.collection_name LIKE ? OR c.brand LIKE ?)`; p.push(`%${search}%`,`%${search}%`); }
+      sql += ` ORDER BY c.${sort_col}`;
+      [collections] = await db.query(sql, p);
+    } else if (req.session.user.role === 'developer') {
+      let sql = `SELECT * FROM fit_collection WHERE 1=1`;
+      let p = [];
+      if (search) { sql += ` AND (collection_name LIKE ? OR brand LIKE ?)`; p.push(`%${search}%`,`%${search}%`); }
+      sql += ` ORDER BY ${sort_col}`;
+      [collections] = await db.query(sql, p);
+    }
+    res.render('collection', { collections, show_id, search, sort: sort_col });
   } catch (err) {
     console.error(err);
-    res.render('collection', { collections: [], show_id });
+    res.render('collection', { collections: [], show_id, search: '', sort: 'collection_id' });
   }
+});
+
+router.get('/collection/export', requireLogin, async (req, res) => {
+  const show_id = req.query.show_id;
+  try {
+    const [rows] = show_id
+      ? await db.query(`SELECT c.* FROM fit_collection c JOIN show_event se ON se.collection_id = c.collection_id WHERE se.show_id = ? ORDER BY c.collection_id`, [show_id])
+      : await db.query(`SELECT * FROM fit_collection ORDER BY collection_id`);
+    const headers = ['collection_id','collection_name','brand','season','collection_year','collection_status'];
+    const csv = [headers.join(','), ...rows.map(r => headers.map(h => `"${(r[h]??'').toString().replace(/"/g,'""')}"`).join(','))].join('\n');
+    res.setHeader('Content-Type','text/csv');
+    res.setHeader('Content-Disposition','attachment; filename="collections_export.csv"');
+    res.send(csv);
+  } catch(err) { console.error(err); res.redirect(`/collection${show_id?`?show_id=${show_id}`:''}`); }
 });
 
 router.get('/collectionadd', requireLogin, (req, res) =>

@@ -5,21 +5,44 @@ const { requireLogin } = require('../middleware/auth');
 
 router.get('/fitting', requireLogin, async (req, res) => {
   const show_id = req.query.show_id;
+  const search = req.query.search || '';
+  const sort = req.query.sort || 'fitting_id';
+  const allowed = ['fitting_id','fitting_date','fitting_status'];
+  const sort_col = allowed.includes(sort) ? sort : 'fitting_id';
   try {
-    const [fittings] = show_id
-      ? await db.query(
-          `SELECT f.* FROM fitting f
-           JOIN fashion_look l ON l.look_id = f.look_id
-           JOIN show_event se ON se.collection_id = l.collection_id
-           WHERE se.show_id = ? ORDER BY f.fitting_id`, [show_id])
-      : req.session.user.role === 'developer'
-        ? await db.query(`SELECT * FROM fitting ORDER BY fitting_id`)
-        : [[]];
-    res.render('fitting', { fittings, show_id });
+    let fittings = [];
+    if (show_id) {
+      let sql = `SELECT f.* FROM fitting f JOIN fashion_look l ON l.look_id = f.look_id JOIN show_event se ON se.collection_id = l.collection_id WHERE se.show_id = ?`;
+      let p = [show_id];
+      if (search) { sql += ` AND f.fitting_status LIKE ?`; p.push(`%${search}%`); }
+      sql += ` ORDER BY f.${sort_col}`;
+      [fittings] = await db.query(sql, p);
+    } else if (req.session.user.role === 'developer') {
+      let sql = `SELECT * FROM fitting WHERE 1=1`;
+      let p = [];
+      if (search) { sql += ` AND fitting_status LIKE ?`; p.push(`%${search}%`); }
+      sql += ` ORDER BY ${sort_col}`;
+      [fittings] = await db.query(sql, p);
+    }
+    res.render('fitting', { fittings, show_id, search, sort: sort_col });
   } catch (err) {
     console.error(err);
-    res.render('fitting', { fittings: [], show_id });
+    res.render('fitting', { fittings: [], show_id, search: '', sort: 'fitting_id' });
   }
+});
+
+router.get('/fitting/export', requireLogin, async (req, res) => {
+  const show_id = req.query.show_id;
+  try {
+    const [rows] = show_id
+      ? await db.query(`SELECT f.* FROM fitting f JOIN fashion_look l ON l.look_id = f.look_id JOIN show_event se ON se.collection_id = l.collection_id WHERE se.show_id = ? ORDER BY f.fitting_id`, [show_id])
+      : await db.query(`SELECT * FROM fitting ORDER BY fitting_id`);
+    const headers = ['fitting_id','look_id','fitting_date','fitting_status'];
+    const csv = [headers.join(','), ...rows.map(r => headers.map(h => `"${(r[h]??'').toString().replace(/"/g,'""')}"`).join(','))].join('\n');
+    res.setHeader('Content-Type','text/csv');
+    res.setHeader('Content-Disposition','attachment; filename="fittings_export.csv"');
+    res.send(csv);
+  } catch(err) { console.error(err); res.redirect(`/fitting${show_id?`?show_id=${show_id}`:''}`); }
 });
 
 router.get('/fittingadd', requireLogin, (req, res) =>
