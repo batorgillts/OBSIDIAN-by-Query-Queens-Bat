@@ -12,16 +12,19 @@ router.get('/collection', requireLogin, async (req, res) => {
   try {
     let collections = [];
     if (show_id) {
-      let sql = `SELECT c.* FROM fit_collection c JOIN show_event se ON se.collection_id = c.collection_id WHERE se.show_id = ?`;
+      // count_looks() is a stored SQL function — counts looks in a collection
+      let sql = `SELECT c.*, count_looks(c.collection_id) AS look_count
+                 FROM fit_collection c JOIN show_event se ON se.collection_id = c.collection_id
+                 WHERE se.show_id = ?`;
       let p = [show_id];
       if (search) { sql += ` AND (c.collection_name LIKE ? OR c.brand LIKE ?)`; p.push(`%${search}%`,`%${search}%`); }
       sql += ` ORDER BY c.${sort_col}`;
       [collections] = await db.query(sql, p);
     } else if (req.session.user.role === 'developer') {
-      let sql = `SELECT * FROM fit_collection WHERE 1=1`;
+      let sql = `SELECT c.*, count_looks(c.collection_id) AS look_count FROM fit_collection c WHERE 1=1`;
       let p = [];
-      if (search) { sql += ` AND (collection_name LIKE ? OR brand LIKE ?)`; p.push(`%${search}%`,`%${search}%`); }
-      sql += ` ORDER BY ${sort_col}`;
+      if (search) { sql += ` AND (c.collection_name LIKE ? OR c.brand LIKE ?)`; p.push(`%${search}%`,`%${search}%`); }
+      sql += ` ORDER BY c.${sort_col}`;
       [collections] = await db.query(sql, p);
     }
     res.render('collection', { collections, show_id, search, sort: sort_col });

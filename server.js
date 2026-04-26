@@ -3,6 +3,10 @@ const express = require('express');
 const session = require('express-session');
 const flash = require('connect-flash');
 const path = require('path');
+const fs = require('fs');
+
+// Ensure uploads directory always exists (Render ephemeral filesystem)
+fs.mkdirSync(path.join(__dirname, 'public/uploads'), { recursive: true });
 
 const app = express();
 

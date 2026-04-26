@@ -18,17 +18,35 @@ router.get('/showorder', requireLogin, async (req, res) => {
   }
 });
 
-router.get('/showorderadd', requireLogin, (req, res) =>
-  res.render('showorderadd', { show_id: req.query.show_id })
-);
+router.get('/showorderadd', requireLogin, async (req, res) => {
+  const show_id = req.query.show_id;
+  let suggested_seq = 1;
+  if (show_id) {
+    try {
+      // next_sequence() is a stored SQL function — returns MAX(sequence_number)+1 for a show
+      const [[row]] = await db.query('SELECT next_sequence(?) AS next_seq', [show_id]);
+      suggested_seq = row.next_seq || 1;
+    } catch (e) { /* use default 1 */ }
+  }
+  res.render('showorderadd', { show_id, suggested_seq });
+});
 
 router.post('/showorderadd', requireLogin, async (req, res) => {
   const { show_id, look_id, sequence_number } = req.body;
   try {
-    await db.query(
-      'INSERT INTO show_order (show_id, look_id, sequence_number) VALUES (?, ?, ?)',
-      [show_id, look_id, sequence_number]
+    // Get next available show_order_id for the stored procedure
+    const [[{ next_id }]] = await db.query('SELECT COALESCE(MAX(show_order_id), 0) + 1 AS next_id FROM show_order');
+
+    // Call stored procedure ShowSequenceCheck — validates show, look, and duplicate sequence
+    const [results] = await db.query(
+      'CALL ShowSequenceCheck(?, ?, ?, ?)',
+      [next_id, show_id, look_id, sequence_number]
     );
+    const msg = Object.values(results[0][0])[0];
+    if (String(msg).startsWith('Error:')) {
+      req.flash('error', msg);
+      return res.redirect(`/showorderadd?show_id=${show_id}`);
+    }
     req.flash('success', 'Show order entry added.');
     res.redirect(`/showorder?show_id=${show_id}`);
   } catch (err) {

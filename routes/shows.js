@@ -51,19 +51,22 @@ router.get('/admin', requireLogin, async (req, res) => {
 
 router.get('/myshows', requireLogin, async (req, res) => {
   try {
+    // is_show_ready() is a stored SQL function — returns 1 if show has coordinator + sequence
     const [shows] = await db.query(
       req.session.user.role === 'developer'
-        ? `SELECT se.*, CONCAT(sc.first_name,' ',sc.last_name) AS coordinator_name
+        ? `SELECT se.*, CONCAT(sc.first_name,' ',sc.last_name) AS coordinator_name,
+                  is_show_ready(se.show_id) AS ready
            FROM show_event se
            LEFT JOIN show_coordinator sc ON sc.user_id = se.user_id
            ORDER BY se.show_date DESC`
-        : 'SELECT * FROM show_event WHERE user_id = ? ORDER BY show_date DESC',
+        : `SELECT se.*, is_show_ready(se.show_id) AS ready
+           FROM show_event se WHERE user_id = ? ORDER BY show_date DESC`,
       req.session.user.role === 'developer' ? [] : [req.session.user.id]
     );
     res.render('myshows', { shows, isAdmin: req.session.user.role === 'developer' });
   } catch (err) {
     console.error(err);
-    res.render('myshows', { shows: [] });
+    res.render('myshows', { shows: [], isAdmin: false });
   }
 });
 
@@ -73,11 +76,26 @@ router.post('/myshowsregistration', requireLogin, upload.single('logo'), async (
   const { show_name, show_date, venue, show_address, start_time, end_time, collection_id } = req.body;
   const logo_path = req.file ? `/uploads/${req.file.filename}` : null;
   try {
-    await db.query(
-      'INSERT INTO show_event (collection_id, user_id, show_name, show_date, venue, start_time, end_time, show_address, logo_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [collection_id || null, req.session.user.id, show_name, show_date, venue, start_time || null, end_time || null, show_address, logo_path]
+    // Get next available show_id for the stored procedure
+    const [[{ next_id }]] = await db.query('SELECT COALESCE(MAX(show_id), 0) + 1 AS next_id FROM show_event');
+
+    // Call stored procedure ScheduleShow — validates coordinator, collection, and times
+    const [results] = await db.query(
+      'CALL ScheduleShow(?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [next_id, collection_id || null, req.session.user.id,
+       show_name, show_date, venue || null, show_address || null,
+       start_time || null, end_time || null]
     );
-    req.flash('success', 'Show added successfully.');
+    const msg = Object.values(results[0][0])[0];
+    if (String(msg).startsWith('Error:')) {
+      req.flash('error', msg);
+      return res.redirect('/myshowsregistration');
+    }
+    // Store the uploaded logo (procedure doesn't handle files, so update separately)
+    if (logo_path) {
+      await db.query('UPDATE show_event SET logo_path = ? WHERE show_id = ?', [logo_path, next_id]);
+    }
+    req.flash('success', 'Show scheduled successfully.');
     res.redirect('/myshows');
   } catch (err) {
     console.error(err);

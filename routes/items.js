@@ -12,7 +12,9 @@ router.get('/item', requireLogin, async (req, res) => {
   try {
     let items = [];
     if (show_id) {
-      let sql = `SELECT i.* FROM item i
+      // pending_alterations() is a stored SQL function — counts pending alterations per item
+      let sql = `SELECT i.*, pending_alterations(i.item_id) AS pending_alt
+                 FROM item i
                  JOIN show_event se ON se.collection_id = i.collection_id
                  WHERE se.show_id = ?`;
       let params = [show_id];
@@ -20,10 +22,10 @@ router.get('/item', requireLogin, async (req, res) => {
       sql += ` ORDER BY i.${sort_col}`;
       [items] = await db.query(sql, params);
     } else if (req.session.user.role === 'developer') {
-      let sql = `SELECT * FROM item WHERE 1=1`;
+      let sql = `SELECT i.*, pending_alterations(i.item_id) AS pending_alt FROM item i WHERE 1=1`;
       let params = [];
-      if (category) { sql += ` AND item_category LIKE ?`; params.push(`%${category}%`); }
-      sql += ` ORDER BY ${sort_col}`;
+      if (category) { sql += ` AND i.item_category LIKE ?`; params.push(`%${category}%`); }
+      sql += ` ORDER BY i.${sort_col}`;
       [items] = await db.query(sql, params);
     }
     res.render('item', { items, show_id, category, sort: sort_col });
@@ -92,6 +94,33 @@ router.post('/itemdelete', requireLogin, async (req, res) => {
     console.error(err);
     req.flash('error', 'Failed to delete item.');
     res.redirect('/itemdelete');
+  }
+});
+
+// Move Item — calls stored procedure MoveItem(item_id, location_id, collection_id)
+router.get('/itemmove', requireLogin, (req, res) =>
+  res.render('itemmove', { show_id: req.query.show_id })
+);
+
+router.post('/itemmove', requireLogin, async (req, res) => {
+  const { item_id, location_id, collection_id, show_id } = req.body;
+  try {
+    // Call stored procedure MoveItem — validates item, collection ownership, and location
+    const [results] = await db.query(
+      'CALL MoveItem(?, ?, ?)',
+      [item_id, location_id, collection_id]
+    );
+    const msg = Object.values(results[0][0])[0];
+    if (String(msg).startsWith('Error:')) {
+      req.flash('error', msg);
+      return res.redirect(`/itemmove${show_id ? `?show_id=${show_id}` : ''}`);
+    }
+    req.flash('success', 'Item moved successfully.');
+    res.redirect(`/item${show_id ? `?show_id=${show_id}` : ''}`);
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Failed to move item.');
+    res.redirect('/itemmove');
   }
 });
 

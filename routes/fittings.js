@@ -52,11 +52,20 @@ router.get('/fittingadd', requireLogin, (req, res) =>
 router.post('/fittingadd', requireLogin, async (req, res) => {
   const { look_id, fitting_date, fitting_status, show_id } = req.body;
   try {
-    await db.query(
-      'INSERT INTO fitting (look_id, fitting_date, fitting_status) VALUES (?, ?, ?)',
-      [look_id, fitting_date, fitting_status]
+    // Get next available fitting_id for the stored procedure
+    const [[{ next_id }]] = await db.query('SELECT COALESCE(MAX(fitting_id), 0) + 1 AS next_id FROM fitting');
+
+    // Call stored procedure FittingAppointment — validates look exists, checks duplicate
+    const [results] = await db.query(
+      'CALL FittingAppointment(?, ?, ?, ?)',
+      [next_id, look_id, fitting_date || null, fitting_status]
     );
-    req.flash('success', 'Fitting added.');
+    const msg = Object.values(results[0][0])[0];
+    if (String(msg).startsWith('Error:')) {
+      req.flash('error', msg);
+      return res.redirect(`/fittingadd${show_id ? `?show_id=${show_id}` : ''}`);
+    }
+    req.flash('success', 'Fitting scheduled.');
     res.redirect(`/fitting${show_id ? `?show_id=${show_id}` : ''}`);
   } catch (err) {
     console.error(err);

@@ -5,3 +5,4 @@ public/uploads/*.jpeg
 public/uploads/*.png
 public/uploads/*.gif
 *.log
+!public/uploads/.gitkeep
