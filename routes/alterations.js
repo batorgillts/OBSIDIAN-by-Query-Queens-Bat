@@ -6,7 +6,13 @@ const { requireLogin } = require('../middleware/auth');
 router.get('/alteration', requireLogin, async (req, res) => {
   const show_id = req.query.show_id;
   try {
-    const [alterations] = await db.query('SELECT * FROM alteration ORDER BY alteration_id');
+    const [alterations] = show_id
+      ? await db.query(
+          `SELECT a.* FROM alteration a
+           JOIN item i ON i.item_id = a.item_id
+           JOIN show_event se ON se.collection_id = i.collection_id
+           WHERE se.show_id = ? ORDER BY a.alteration_id`, [show_id])
+      : [[]];
     res.render('alteration', { alterations, show_id });
   } catch (err) {
     console.error(err);

@@ -6,7 +6,12 @@ const { requireLogin } = require('../middleware/auth');
 router.get('/collection', requireLogin, async (req, res) => {
   const show_id = req.query.show_id;
   try {
-    const [collections] = await db.query('SELECT * FROM fit_collection ORDER BY collection_id');
+    const [collections] = show_id
+      ? await db.query(
+          `SELECT c.* FROM fit_collection c
+           JOIN show_event se ON se.collection_id = c.collection_id
+           WHERE se.show_id = ? ORDER BY c.collection_id`, [show_id])
+      : [[]];
     res.render('collection', { collections, show_id });
   } catch (err) {
     console.error(err);
