@@ -33,7 +33,7 @@ router.post('/login', async (req, res) => {
       email: user.email,
       role: user.reg_role,
     };
-    res.redirect('/myshows');
+    res.redirect(user.reg_role === 'developer' ? '/admin' : '/myshows');
   } catch (err) {
     console.error(err);
     req.flash('error', 'Server error. Please try again.');

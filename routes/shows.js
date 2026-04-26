@@ -11,6 +11,44 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
+// Developer-only admin dashboard
+router.get('/admin', requireLogin, async (req, res) => {
+  if (req.session.user.role !== 'developer') return res.redirect('/myshows');
+  try {
+    const [coordinators] = await db.query(`
+      SELECT
+        sc.user_id,
+        sc.first_name,
+        sc.last_name,
+        sc.email,
+        sc.phone_number,
+        sc.reg_role,
+        COUNT(se.show_id) AS show_count
+      FROM show_coordinator sc
+      LEFT JOIN show_event se ON se.user_id = sc.user_id
+      GROUP BY sc.user_id
+      ORDER BY show_count DESC
+    `);
+
+    const [totals] = await db.query(`
+      SELECT
+        (SELECT COUNT(*) FROM show_coordinator) AS total_coordinators,
+        (SELECT COUNT(*) FROM show_event)       AS total_shows,
+        (SELECT COUNT(*) FROM fit_collection)   AS total_collections,
+        (SELECT COUNT(*) FROM fashion_look)     AS total_looks,
+        (SELECT COUNT(*) FROM item)             AS total_items,
+        (SELECT COUNT(*) FROM model)            AS total_models,
+        (SELECT COUNT(*) FROM fitting)          AS total_fittings,
+        (SELECT COUNT(*) FROM alteration)       AS total_alterations
+    `);
+
+    res.render('admin', { coordinators, stats: totals[0] });
+  } catch (err) {
+    console.error(err);
+    res.render('admin', { coordinators: [], stats: {} });
+  }
+});
+
 router.get('/myshows', requireLogin, async (req, res) => {
   try {
     const [shows] = await db.query(
